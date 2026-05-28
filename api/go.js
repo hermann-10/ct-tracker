@@ -23,12 +23,11 @@ const EVENTS = {
     destination: 'https://eventfrog.ch/fr/p/soirees-fetes/soiree-a-theme/summer-vibes-afro-halle-w-7465431493805902516.html',
     date: '2026-06-05',
   },
-  // Add more events as needed:
-  // 'next-event': {
-  //   name: 'Next Event Name',
-  //   destination: 'https://eventfrog.ch/...',
-  //   date: '2026-07-XX',
-  // },
+    'basel-060626': {
+          name: 'Comportement Tropical - Club Cello Basel',
+          destination: 'https://eventfrog.ch/fr/p/soirees-fetes/soiree-a-theme/comportement-tropical-club-cello-basel-7463963782672313961.html',
+          date: '2026-06-06',
+    },
 };
 
 // Initialize Supabase client
