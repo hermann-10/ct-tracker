@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/go/:slug", "destination": "/api/go?slug=:slug" },
+    { "source": "/api/track", "destination": "/api/track" },
+    { "source": "/api/stats", "destination": "/api/stats" },
+    { "source": "/api/events", "destination": "/api/events" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+      ]
+    }
+  ]
+}
