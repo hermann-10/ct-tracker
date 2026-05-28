@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "buildCommand": "",
+  "outputDirectory": "public",
   "rewrites": [
     { "source": "/go/:slug", "destination": "/api/go?slug=:slug" },
     { "source": "/api/track", "destination": "/api/track" },
