@@ -16,26 +16,33 @@
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
 
-// Event configurations - add your events here
-const EVENTS = {
-  'summer-vibes': {
-    name: 'Summer Vibes Afro - Halle W',
-    destination: 'https://eventfrog.ch/fr/p/soirees-fetes/soiree-a-theme/summer-vibes-afro-halle-w-7465431493805902516.html',
-    date: '2026-06-05',
-  },
-    'basel-060626': {
-          name: 'Comportement Tropical - Club Cello Basel',
-          destination: 'https://eventfrog.ch/fr/p/soirees-fetes/soiree-a-theme/comportement-tropical-club-cello-basel-7463963782672313961.html',
-          date: '2026-06-06',
-    },
-};
-
 // Initialize Supabase client
 function getSupabase() {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_KEY;
   if (!url || !key) return null;
   return createClient(url, key);
+}
+
+// Fetch event dynamically from Supabase
+async function getEventBySlug(supabase, slug) {
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase
+      .from('events')
+      .select('name, ticket_url, image_url, date')
+      .eq('slug', slug)
+      .single();
+    if (error || !data) return null;
+    return {
+      name: data.name,
+      destination: data.ticket_url,
+      date: data.date,
+      image_url: data.image_url,
+    };
+  } catch {
+    return null;
+  }
 }
 
 // Hash IP for privacy (we don't store raw IPs)
@@ -152,15 +159,21 @@ function buildRedirectUrl(destination, query) {
 module.exports = async function handler(req, res) {
   const slug = req.query.slug;
 
-  // Look up event
-  const event = EVENTS[slug];
-  if (!event) {
+  if (!slug) {
+    return res.redirect(302, 'https://hm-events.ch');
+  }
+
+  // Look up event dynamically from Supabase
+  const supabase = getSupabase();
+  const event = await getEventBySlug(supabase, slug);
+
+  if (!event || !event.destination) {
     res.status(404).send(`
       <!DOCTYPE html>
-      <html><head><title>Event not found</title></head>
+      <html><head><title>Événement non trouvé</title></head>
       <body style="font-family:Arial;text-align:center;padding:50px;">
-        <h1>Event not found</h1>
-        <p>Visit <a href="https://hm-events.ch">hm-events.ch</a> for upcoming events.</p>
+        <h1>Événement non trouvé</h1>
+        <p>Visite <a href="https://hm-events.ch">hm-events.ch</a> pour les prochains événements.</p>
       </body></html>
     `);
     return;
@@ -173,7 +186,6 @@ module.exports = async function handler(req, res) {
   const params = parseTrackingParams(req.query);
 
   // Record click async (don't block redirect)
-  const supabase = getSupabase();
   const clickData = {
     slug,
     name: event.name,
